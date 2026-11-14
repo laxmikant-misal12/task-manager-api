@@ -1,0 +1,31 @@
+### 1. Create task
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+
+{
+  "title": "Submit Python practical",
+  "description": "Complete and submit journal",
+  "status": "pending"
+}
+
+### 2. Get all tasks
+GET http://localhost:5000/api/tasks
+
+### 3. Get one task
+GET http://localhost:5000/api/tasks/6af890859bd6ea9643beab6c
+
+### 4. Update task
+PUT http://localhost:5000/api/tasks/6af890859bd6ea9643beab6c
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### 5. Delete task
+DELETE http://localhost:5000/api/tasks/6af890859bd6ea9643beab6c
+### 6. Delete duplicate 1
+DELETE http://localhost:5000/api/tasks/6af892349bd6ea9643beab6d
+
+### 7. Delete duplicate 2
+DELETE http://localhost:5000/api/tasks/6af8928e9bd6ea9643beab6e
