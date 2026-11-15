@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 
 dotenv.config();
@@ -15,7 +16,8 @@ app.get("/", (req, res) => {
   res.send("Task Manager API is running");
 });
 
-// Task routes
+// Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 
 // Handle unknown routes

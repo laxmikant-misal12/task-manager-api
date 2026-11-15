@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
@@ -7,23 +8,36 @@ const generateToken = (id) => {
   });
 };
 
-// POST /api/auth/register
-const registerUser = async (req, res, next) => {
+// Register a new user  ->  POST /api/auth/register
+const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      res.status(400);
-      throw new Error("Please provide name, email and password");
+      return res
+        .status(400)
+        .json({ message: "Name, email and password are required" });
+    }
+
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
     }
 
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (userExists) {
-      res.status(400);
-      throw new Error("User already exists with this email");
+      return res.status(400).json({ message: "Email is already registered" });
     }
 
-    const user = await User.create({ name, email, password });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
 
     res.status(201).json({
       _id: user._id,
@@ -32,28 +46,32 @@ const registerUser = async (req, res, next) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-// POST /api/auth/login
-const loginUser = async (req, res, next) => {
+// Login user  ->  POST /api/auth/login
+const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400);
-      throw new Error("Please provide email and password");
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
-    // password has select:false, so we ask for it explicitly
     const user = await User.findOne({ email: email.toLowerCase() }).select(
       "+password"
     );
 
-    if (!user || !(await user.matchPassword(password))) {
-      res.status(401);
-      throw new Error("Invalid email or password");
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     res.status(200).json({
@@ -63,13 +81,17 @@ const loginUser = async (req, res, next) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-// GET /api/auth/me  (protected)
+// Get logged in user  ->  GET /api/auth/me
 const getMe = async (req, res) => {
-  res.status(200).json(req.user);
+  res.status(200).json({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+  });
 };
 
 module.exports = { registerUser, loginUser, getMe };

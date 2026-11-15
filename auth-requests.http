@@ -1,0 +1,42 @@
+@baseUrl = http://localhost:5000
+@token =  PASTE_TOKEN_HERE
+### 1. Register
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "123456"
+}
+
+### 2. Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+
+### 3. Get me
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### 4. Create task
+POST {{baseUrl}}/api/tasks
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Learn JWT",
+  "description": "Day 3 work",
+  "status": "pending"
+}
+
+### 5. Get my tasks
+GET {{baseUrl}}/api/tasks
+Authorization: Bearer {{token}}
+
+### 6. Without token (401 aana chahiye)
+GET {{baseUrl}}/api/tasks
